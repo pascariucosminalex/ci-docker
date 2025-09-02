@@ -50,13 +50,23 @@ jobs:
     name: Deploy to Production
     needs: test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # rulează doar pe branch-ul main
+    environment: production
     env:
-      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+      MONGODB_USERNAME: ${{ secrets.USER_PRODUCTION }}
+      MONGODB_PASSWORD: ${{ secrets.PASS_PRODUCTION }}
       MONGODB_DB_NAME: gha-demo
+      MONGODB_CONNECTION_PROTOCOL: mongodb+srv
+      MONGODB_CLUSTER_ADDRESS: db1.wkhlpd9.mongodb.net
       PORT: 3000
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Output deploy environment info
         run: |
           echo "MONGODB_DB_NAME: $MONGODB_DB_NAME"
           echo "MONGODB_USERNAME: $MONGODB_USERNAME"
+          echo "MONGODB_PASSWORD: $MONGODB_PASSWORD"
           echo "PORT: $PORT"
+          echo "MONGODB_URI: ${MONGODB_CONNECTION_PROTOCOL}://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_ADDRESS}/${MONGODB_DB_NAME}?retryWrites=true&w=majority"
